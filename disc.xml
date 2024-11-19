@@ -1,0 +1,10 @@
+<iso_project image_name="mkpsxiso.bin" cue_sheet="mkpsxiso.cue">
+    <track type="data">
+        <identifiers system="PLAYSTATION" application="PLAYSTATION" creation_date="1995071922595900+36"/>
+        <default_attributes gmt_offs="36" xa_attrib="16" xa_perm="1365" xa_gid="0" xa_uid="0"/>
+        <directory_tree>
+            <file name="PSX.EXE" source="build/minimal.exe" type="data"/>
+            <!-- Add any other files you want to include -->
+       </directory_tree>
+    </track>
+</iso_project>
