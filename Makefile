@@ -30,8 +30,7 @@ BUILD	:= build
 
 # Build a single executable or a disc image.
 #all: build/$(NAME).exe
-all: $(BUILD)/$(NAME).bin
-	mkdir -p $(BUILD)
+all: $(BUILD) $(BUILD)/$(NAME).bin
 .PHONY: all
 
 build/$(NAME).elf: src/main.c src/kernel.s
@@ -43,6 +42,9 @@ $(BUILD)/$(NAME).exe: $(BUILD)/$(NAME).elf
 # This rule can be removed if you don't need a disc image.
 $(BUILD)/$(NAME).bin: disc.xml $(BUILD)/$(NAME).exe $(FILES)
 	$(MKISO) -y --quiet --cuefile build/$(NAME).cue --output $@ $<
+
+$(BUILD):
+	mkdir -p $@
 
 clean:
 	rm -r build/*
