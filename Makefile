@@ -19,8 +19,8 @@ INCDIRS	+= -Ispicy
 #LIBS		+= -lc -lapi # etc
 
 # Required flags
-CCFLAGS	:= -Wall -mips1 -march=r3000 -mno-abicalls -static -msoft-float -fno-builtin
-LDFLAGS := -T ps-exe.ld -Wl,--oformat=elf32-littlemips
+CCFLAGS	:= -Wall -march=r3000 -mno-abicalls -static -msoft-float -fno-builtin
+LDFLAGS := -T ps-exe.ld -Wl,--oformat=elf32-littlemips -nostartfiles
 
 # User Flags
 CCFLAGS	+= -g -O1 -flto -G0
