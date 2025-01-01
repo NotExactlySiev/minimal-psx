@@ -29,7 +29,6 @@ LDFLAGS += -Wl,-Map=build/$(NAME).map
 BUILD	:= build
 
 # Build a single executable or a disc image.
-#all: build/$(NAME).exe
 all: $(BUILD) $(BUILD)/$(NAME).bin
 .PHONY: all
 
@@ -42,6 +41,10 @@ $(BUILD)/$(NAME).exe: $(BUILD)/$(NAME).elf
 # This rule can be removed if you don't need a disc image.
 $(BUILD)/$(NAME).bin: disc.xml $(BUILD)/$(NAME).exe $(FILES)
 	$(MKISO) -y --quiet --cuefile build/$(NAME).cue --output $@ $<
+
+# In case you wanna embed any files into the binary.
+$(BUILD)/%.elf: bin/%.*
+	$(OBJCOPY) -I binary -O elf32-littlemips $^ $@
 
 $(BUILD):
 	mkdir -p $@
