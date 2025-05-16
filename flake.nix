@@ -16,18 +16,18 @@
       devShells = forAllSystems (system:
       let
         pkgs = import nixpkgs {
-          localSystem = { system = system; };
+          localSystem = { inherit system; };
         };
         crossPkgs = import nixpkgs {
-          localSystem = { system = system; };
+          localSystem = { inherit system; };
           crossSystem = { system = "mipsel-none-elf"; };
         };
       in
       {
         default = pkgs.mkShell {
           packages = [
-            crossPkgs.buildPackages.gcc-unwrapped
-            crossPkgs.buildPackages.binutils-unwrapped
+            crossPkgs.stdenvNoLibs.cc.cc
+            crossPkgs.stdenvNoLibs.cc.bintools.bintools
           ];
         };
       });
