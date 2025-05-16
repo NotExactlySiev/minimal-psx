@@ -32,7 +32,7 @@ BUILD	:= build
 all: $(BUILD) $(BUILD)/$(NAME).bin
 .PHONY: all
 
-build/$(NAME).elf: src/main.c src/kernel.s
+build/$(NAME).elf: src/main.c src/kernel.s src/crt0.s
 	$(CC) $(INCDIRS) $(CCFLAGS) $(LIBDIRS) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 $(BUILD)/$(NAME).exe: $(BUILD)/$(NAME).elf

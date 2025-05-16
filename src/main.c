@@ -7,7 +7,7 @@ void printf(const char *, ...);
 #define SCREEN_W 256
 #define SCREEN_H 240
 
-int _start()
+int main(int argc, char *argv[])
 {
     printf("Hi!\n");
 
@@ -28,6 +28,6 @@ int _start()
     GPU_GP0 = gp0_xy(-40, 40);
     GPU_GP0 = gp0_rgb(0, 0, 255);
     GPU_GP0 = gp0_xy(40, 40);
-    
+
     for (;;);
 }
