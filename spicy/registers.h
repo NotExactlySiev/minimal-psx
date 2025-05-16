@@ -1,5 +1,5 @@
 /*
- * ps1-bare-metal - (C) 2023-2024 spicyjpeg
+ * ps1-bare-metal - (C) 2023-2025 spicyjpeg
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -38,7 +38,8 @@ typedef enum {
 	IO_BASE    = 0xbf801000,
 	EXP2_BASE  = 0xbf802000,
 	EXP3_BASE  = 0xbfa00000,
-	DEV2_BASE  = 0xbfc00000
+	DEV2_BASE  = 0xbfc00000,
+	CPU_BASE   = 0xfffe0000
 } BaseAddress;
 
 /* Bus interface */
@@ -193,12 +194,9 @@ typedef enum {
 	DMA_CHCR_PAUSE            = 1 << 29  // Burst mode only
 } DMACHCRFlag;
 
-typedef enum {
-	DMA_DPCR_PRIORITY_BITMASK = 7 << 0,
-	DMA_DPCR_PRIORITY_MIN     = 7 << 0,
-	DMA_DPCR_PRIORITY_MAX     = 0 << 0,
-	DMA_DPCR_ENABLE           = 1 << 3
-} DMADPCRFlag;
+#define DMA_DPCR_CH_PRIORITY_BITMASK(N)   (7              << (4 * (N)))
+#define DMA_DPCR_CH_PRIORITY(N, priority) ((priority & 7) << (4 * (N)))
+#define DMA_DPCR_CH_ENABLE(N)             ((1 << 3)       << (4 * (N)))
 
 typedef enum {
 	DMA_DICR_CH_MODE_BITMASK   = 0x7f <<  0,
@@ -209,9 +207,9 @@ typedef enum {
 	DMA_DICR_IRQ               =    1 << 31
 } DMADICRFlag;
 
-#define DMA_DICR_CH_MODE(dma)   (1 << ((dma) +  0))
-#define DMA_DICR_CH_ENABLE(dma) (1 << ((dma) + 16))
-#define DMA_DICR_CH_STAT(dma)   (1 << ((dma) + 24))
+#define DMA_DICR_CH_MODE(N)   (1 << ((N) +  0))
+#define DMA_DICR_CH_ENABLE(N) (1 << ((N) + 16))
+#define DMA_DICR_CH_STAT(N)   (1 << ((N) + 24))
 
 #define DMA_MADR(N) _MMIO32((IO_BASE | 0x080) + (16 * (N)))
 #define DMA_BCR(N)  _MMIO32((IO_BASE | 0x084) + (16 * (N)))
@@ -369,22 +367,20 @@ typedef enum {
 /* MDEC */
 
 typedef enum {
-	MDEC_CMD_NOP             = 0 << 29,
-	MDEC_CMD_DECODE          = 1 << 29,
-	MDEC_CMD_SET_QUANT_TABLE = 2 << 29,
-	MDEC_CMD_SET_IDCT_TABLE  = 3 << 29
-} MDECCommand;
-
-typedef enum {
-	MDEC_CMD_FLAG_LENGTH_BITMASK = 0xffff <<  0, // MDEC_CMD_DECODE
-	MDEC_CMD_FLAG_USE_CHROMA     =      1 <<  0, // MDEC_CMD_SET_QUANT_TABLE
-	MDEC_CMD_FLAG_SIGNED         =      1 << 25, // MDEC_CMD_DECODE
-	MDEC_CMD_FLAG_16BPP_MASK     =      1 << 26, // MDEC_CMD_DECODE
-	MDEC_CMD_FLAG_FORMAT_BITMASK =      3 << 27, // MDEC_CMD_DECODE
-	MDEC_CMD_FLAG_FORMAT_4BPP    =      0 << 27, // MDEC_CMD_DECODE
-	MDEC_CMD_FLAG_FORMAT_8BPP    =      1 << 27, // MDEC_CMD_DECODE
-	MDEC_CMD_FLAG_FORMAT_24BPP   =      2 << 27, // MDEC_CMD_DECODE
-	MDEC_CMD_FLAG_FORMAT_16BPP   =      3 << 27  // MDEC_CMD_DECODE
+	MDEC_CMD_LENGTH_BITMASK     = 0xffff <<  0, // MDEC_CMD_OP_DECODE
+	MDEC_CMD_USE_CHROMA         =      1 <<  0, // MDEC_CMD_OP_SET_QUANT_TABLE
+	MDEC_CMD_SIGNED             =      1 << 25, // MDEC_CMD_OP_DECODE
+	MDEC_CMD_16BPP_MASK         =      1 << 26, // MDEC_CMD_OP_DECODE
+	MDEC_CMD_FORMAT_BITMASK     =      3 << 27, // MDEC_CMD_OP_DECODE
+	MDEC_CMD_FORMAT_4BPP        =      0 << 27, // MDEC_CMD_OP_DECODE
+	MDEC_CMD_FORMAT_8BPP        =      1 << 27, // MDEC_CMD_OP_DECODE
+	MDEC_CMD_FORMAT_24BPP       =      2 << 27, // MDEC_CMD_OP_DECODE
+	MDEC_CMD_FORMAT_16BPP       =      3 << 27, // MDEC_CMD_OP_DECODE
+	MDEC_CMD_OP_BITMASK         =      7 << 31,
+	MDEC_CMD_OP_NOP             =      0 << 29,
+	MDEC_CMD_OP_DECODE          =      1 << 29,
+	MDEC_CMD_OP_SET_QUANT_TABLE =      2 << 29,
+	MDEC_CMD_OP_SET_IDCT_TABLE  =      3 << 29
 } MDECCommandFlag;
 
 typedef enum {
@@ -528,3 +524,29 @@ typedef enum {
 #define SPU_REVERB_MRAPF2  _MMIO16(IO_BASE | 0xdfa)
 #define SPU_REVERB_VLIN    _MMIO16(IO_BASE | 0xdfc)
 #define SPU_REVERB_VRIN    _MMIO16(IO_BASE | 0xdfe)
+
+/* CW33300 CPU configuration */
+
+typedef enum {
+	CPU_BCC_LOCK           = 1 <<  0,
+	CPU_BCC_INV            = 1 <<  1,
+	CPU_BCC_TAG            = 1 <<  2,
+	CPU_BCC_RAM            = 1 <<  3,
+	CPU_BCC_DBLKSZ_BITMASK = 3 <<  4,
+	CPU_BCC_DBLKSZ_2       = 0 <<  4,
+	CPU_BCC_DBLKSZ_4       = 1 <<  4,
+	CPU_BCC_DS             = 1 <<  7,
+	CPU_BCC_IBLKSZ_BITMASK = 3 <<  8,
+	CPU_BCC_IBLKSZ_2       = 0 <<  8,
+	CPU_BCC_IBLKSZ_4       = 1 <<  8,
+	CPU_BCC_IS0            = 1 << 10,
+	CPU_BCC_IS1            = 1 << 11,
+	CPU_BCC_INTP           = 1 << 12,
+	CPU_BCC_RDPRI          = 1 << 13,
+	CPU_BCC_NOPAD          = 1 << 14,
+	CPU_BCC_BGNT           = 1 << 15,
+	CPU_BCC_LDSCH          = 1 << 16,
+	CPU_BCC_NOSTR          = 1 << 17
+} CPUBCCFlag;
+
+#define CPU_BCC _MMIO32(CPU_BASE | 0x130)
