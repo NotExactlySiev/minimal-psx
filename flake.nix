@@ -26,7 +26,7 @@
       {
         default = pkgs.mkShell {
           packages = [
-            crossPkgs.stdenvNoLibs.cc.cc
+            (crossPkgs.stdenvNoLibs.cc.cc.override { langCC = true; })
             crossPkgs.stdenvNoLibs.cc.bintools.bintools
           ];
         };
