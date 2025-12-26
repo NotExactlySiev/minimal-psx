@@ -15,8 +15,8 @@ INCDIRS	+= -Ispicy
 
 # Do you want Psy-Q?
 #INCDIRS	+= -Ipsyq/include
-#LIBDIRS	+= -Lpsyq/lib
-#LIBS		+= -lc -lapi # etc
+#LIBDIRS	+= -Lpsyq/libs
+#LIBS		+= -lcd -lc -lapi # etc
 
 # Required flags
 CCFLAGS	:= -Wall -ffreestanding -mips1 -march=r3000 -static -msoft-float
